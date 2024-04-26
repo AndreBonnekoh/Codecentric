@@ -21,7 +21,7 @@ namespace Codecentric
             //await GetReposForMember("Test");
 
             Console.WriteLine("Endee");
-            //Console.WriteLine(finalMembers[0]);
+            Console.WriteLine(finalMembers);
             /*foreach (var members in finalMembers)
             {
                 Console.WriteLine(members);
@@ -50,14 +50,15 @@ namespace Codecentric
                     foreach (MemberInformation member in members)
                     {
                         //await Repo[] GetReposForMember(member.login);
-                        //Repo[] repos = await GetReposForMember(member.login);
+                        Repo[] repos = await GetReposForMember(member.login);
                         //await GetLanguages(member.login);
 
                         FinalMember finalMember = new FinalMember
                         {
                             member = member,
-                            //repo = repos,
+                            repo = repos,
                             languages = new string[] { "Java", "C#" }
+                            //languages = await GetLanguages()
                         };
                         //Console.WriteLine("----------");
                         //Console.WriteLine(finalMember);
@@ -72,7 +73,7 @@ namespace Codecentric
             }
         }
 
-        /*static async Task<Repo[]> GetReposForMember(string username)
+        static async Task<Repo[]> GetReposForMember(string username)
         {
             //username = "danielbayerlein";
              Console.WriteLine("In GetReposForMember");
@@ -88,8 +89,8 @@ namespace Codecentric
                     string json = await response.Content.ReadAsStringAsync();
                     //Console.WriteLine($"Repos for {username}:");
                     Console.WriteLine(json);
-                    //List<Repo> repos = JsonConvert.DeserializeObject<List<Repo>>(json);
-                    //return repos.ToArray();
+                    List<Repo> repos = JsonConvert.DeserializeObject<List<Repo>>(json);
+                    return repos.ToArray();
                 }
                 else
                 {
@@ -100,7 +101,7 @@ namespace Codecentric
 
 
             
-        }*/
+        }
         /*static async Task GetLanguages(string username, string name)
         {
             string url = $"https://api.github.com/repos/{username}/{name}";

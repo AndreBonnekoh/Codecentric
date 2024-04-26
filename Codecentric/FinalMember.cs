@@ -9,7 +9,7 @@ namespace Codecentric
     public class FinalMember
     {
         public MemberInformation member { get; set; }
-        public string repo { get; set; }
+        public Repo[] repo { get; set; }
         public string[] languages { get; set; }
     }
 }
