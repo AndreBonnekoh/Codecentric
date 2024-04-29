@@ -25,7 +25,7 @@ namespace Codecentric
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("User-Agent", "C# HttpClient");
-                client.DefaultRequestHeaders.Add("Authorization", "token " + "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");
+                client.DefaultRequestHeaders.Add("Authorization", "token " + "Your authorization token");
                 HttpResponseMessage response = await client.GetAsync(url);
 
                 if (response.IsSuccessStatusCode)
