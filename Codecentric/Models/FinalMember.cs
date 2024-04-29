@@ -8,8 +8,8 @@ namespace Codecentric
 {
     public class FinalMember
     {
-        public MemberInformation member { get; set; }
-        public Repo[] repo { get; set; }
-        public string[] languages { get; set; }
+        public MemberInformation Member { get; set; }
+        public Repository[] Repo { get; set; }
+        public List<string> Languages { get; set; }
     }
 }

@@ -1,70 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Codecentric
 {
     internal class Program
     {
-        private static readonly HttpClient _client = new HttpClient();
-        public static List<FinalMember> finalMembers = new List<FinalMember>();
+        public static List<FinalMember> _finalMembers = new List<FinalMember>();
+
         static async Task Main(string[] args)
         {
-            //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
-            Console.WriteLine("In Main");
             await GetMembers();
-            //await GetReposForMember("Test");
-
-            Console.WriteLine("Endee");
-            Console.WriteLine(finalMembers);
-            /*foreach (var members in finalMembers)
-            {
-                Console.WriteLine(members);
-            }*/
-            
-            Console.WriteLine("Drücken Sie eine beliebige Taste, um das Programm zu beenden...");
+            SaveFinalMembersToJson("finalMembers.json", _finalMembers);
             Console.ReadKey();
         }
 
         static async Task GetMembers()
         {
-            Console.WriteLine("In GetMembers");
             string url = "https://api.github.com/orgs/codecentric/members";
 
             using (HttpClient client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Add("Authorization", "token " + "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");
                 client.DefaultRequestHeaders.Add("User-Agent", "C# HttpClient");
+                client.DefaultRequestHeaders.Add("Authorization", "token " + "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");
                 HttpResponseMessage response = await client.GetAsync(url);
 
                 if (response.IsSuccessStatusCode)
                 {
                     string json = await response.Content.ReadAsStringAsync();
                     
-                     List<MemberInformation> members = JsonConvert.DeserializeObject<List<MemberInformation>>(json);
+                    List<MemberInformation> members = JsonConvert.DeserializeObject<List<MemberInformation>>(json);
+
                     foreach (MemberInformation member in members)
                     {
-                        //await Repo[] GetReposForMember(member.login);
-                        Repo[] repos = await GetReposForMember(member.login);
-                        //await GetLanguages(member.login);
+                        List<string> memberLanguages = new List<string>();
+                        Repository[] repos = await GetReposForMember(member.login);
+
+                        if (repos != null)
+                        {
+                            memberLanguages.Clear();
+                            foreach (Repository repo in repos)
+                            {
+                                if (!string.IsNullOrEmpty(repo.language) && !memberLanguages.Contains(repo.language))
+                                {
+                                    memberLanguages.Add(repo.language);
+                                }
+                            }
+                        }
 
                         FinalMember finalMember = new FinalMember
                         {
-                            member = member,
-                            repo = repos,
-                            languages = new string[] { "Java", "C#" }
-                            //languages = await GetLanguages()
+                            Member = member,
+                            Repo = repos,
+                            Languages = memberLanguages
                         };
-                        //Console.WriteLine("----------");
-                        //Console.WriteLine(finalMember);
-                        finalMembers.Add(finalMember);
+                        _finalMembers.Add(finalMember);
                     }
-                    //Console.WriteLine(json);
                 }
                 else
                 {
@@ -73,10 +67,8 @@ namespace Codecentric
             }
         }
 
-        static async Task<Repo[]> GetReposForMember(string username)
+        static async Task<Repository[]> GetReposForMember(string username)
         {
-            //username = "danielbayerlein";
-             Console.WriteLine("In GetReposForMember");
             string url = $"https://api.github.com/users/{username}/repos";
 
             using (HttpClient client = new HttpClient())
@@ -87,25 +79,40 @@ namespace Codecentric
                 if (response.IsSuccessStatusCode)
                 {
                     string json = await response.Content.ReadAsStringAsync();
-                    //Console.WriteLine($"Repos for {username}:");
-                    Console.WriteLine(json);
-                    List<Repo> repos = JsonConvert.DeserializeObject<List<Repo>>(json);
+                    List<Repository> repos = JsonConvert.DeserializeObject<List<Repository>>(json);
                     return repos.ToArray();
                 }
                 else
                 {
-                    Console.WriteLine($"Failed to fetch repositories for {username}. Status code: {response.StatusCode}");
+                    Console.WriteLine($"Failed to get repositories for {username}. Status code: {response.StatusCode}");
                     return null;
                 }
             }
-
-
-            
         }
-        /*static async Task GetLanguages(string username, string name)
+        static void SaveFinalMembersToJson(string filePath, List<FinalMember> finalMembers)
         {
-            string url = $"https://api.github.com/repos/{username}/{name}";
-        }*/
+            string newJson = JsonConvert.SerializeObject(finalMembers, Formatting.Indented);
+
+            if (File.Exists(filePath))
+            {
+                string existingJson = File.ReadAllText(filePath);
+
+                if (newJson != existingJson)
+                {
+                    File.WriteAllText(filePath, newJson);
+                    Console.WriteLine("Json file has been updated.");
+                }
+                else
+                {
+                    Console.WriteLine("Content of the Json file has not changed.");
+                }
+            }
+            else
+            {
+                File.WriteAllText(filePath, newJson);
+                Console.WriteLine("Json file was created..");
+            }
+        }
 
     }
 }
